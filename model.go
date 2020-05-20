@@ -4,6 +4,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type product struct {
@@ -43,9 +44,14 @@ func (p *product) createProduct(db *sql.DB) error {
 	return nil
 }
 
-func getProducts(db *sql.DB, start, count int) ([]product, error) {
+func getProducts(db *sql.DB, start, count int, sortAscending bool) ([]product, error) {
+	sortDirection := "DESC"
+	if sortAscending == true {
+		sortDirection = "ASC"
+	}
+
 	rows, err := db.Query(
-		"SELECT id, name,  price FROM products LIMIT $1 OFFSET $2",
+		fmt.Sprintf("SELECT id, name, price FROM products ORDER BY price %s LIMIT $1 OFFSET $2", sortDirection),
 		count, start)
 
 	if err != nil {

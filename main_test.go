@@ -51,6 +51,12 @@ func TestEmptyTable(t *testing.T) {
 	clearTable()
 
 	req, _ := http.NewRequest("GET", "/products", nil)
+	q := req.URL.Query()
+	q.Add("count", "10")
+	q.Add("start", "0")
+	q.Add("sortAscending", "false")
+	req.URL.RawQuery = q.Encode()
+
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -127,7 +133,49 @@ func TestGetProduct(t *testing.T) {
 	checkResponseCode(t, http.StatusOK, response.Code)
 }
 
-// main_test.go
+func TestGetProductsDescending(t *testing.T) {
+	clearTable()
+	addProducts(2)
+
+	req, _ := http.NewRequest("GET", "/products", nil)
+	q := req.URL.Query()
+	q.Add("count", "10")
+	q.Add("start", "0")
+	q.Add("sortAscending", "false")
+	req.URL.RawQuery = q.Encode()
+
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var products []product
+	json.Unmarshal(response.Body.Bytes(), &products)
+
+	if products[0].Price != 20 {
+		t.Errorf("Products are not being sorted by descending price")
+	}
+}
+
+func TestGetProductsAscending(t *testing.T) {
+	clearTable()
+	addProducts(2)
+
+	req, _ := http.NewRequest("GET", "/products", nil)
+	q := req.URL.Query()
+	q.Add("count", "10")
+	q.Add("start", "0")
+	q.Add("sortAscending", "true")
+	req.URL.RawQuery = q.Encode()
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var products []product
+	json.Unmarshal(response.Body.Bytes(), &products)
+
+	if products[0].Price != 10 {
+		t.Errorf("Products are not being sorted by ascending price")
+	}
+}
 
 func addProducts(count int) {
 	if count < 1 {

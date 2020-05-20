@@ -74,8 +74,12 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
-	count, _ := strconv.Atoi(r.FormValue("count"))
-	start, _ := strconv.Atoi(r.FormValue("start"))
+	countParam, _ := r.URL.Query()["count"]
+	startParam, _ := r.URL.Query()["start"]
+	sortAscendingParam, _ := r.URL.Query()["sortAscending"]
+	count, _ := strconv.Atoi(countParam[0])
+	start, _ := strconv.Atoi(startParam[0])
+	sortAscending, _ := strconv.ParseBool(sortAscendingParam[0])
 
 	if count > 10 || count < 1 {
 		count = 10
@@ -84,7 +88,7 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	products, err := getProducts(a.DB, start, count)
+	products, err := getProducts(a.DB, start, count, sortAscending)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
