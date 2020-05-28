@@ -27,6 +27,7 @@ func (a *App) Initialize(user, password, dbname string) {
 	var err error
 	a.DB, err = sql.Open("postgres", connectionString)
 	if err != nil {
+		fmt.Printf("Error - connection string: %s", connectionString)
 		log.Fatal(err)
 	}
 
@@ -36,6 +37,7 @@ func (a *App) Initialize(user, password, dbname string) {
 }
 
 func (a *App) Run(addr string) {
+	fmt.Printf("Listening on port 8010.")
 	log.Fatal(http.ListenAndServe(":8010", a.Router))
 }
 
